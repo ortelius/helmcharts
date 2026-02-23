@@ -9,7 +9,7 @@ keywords:
 - AI
 - SBOM
 type: application
-version: 12.0.156
+version: 12.0.157
 appVersion: 12.0.0
 dependencies:
 - name: pdvd-arangodb
