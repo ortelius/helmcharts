@@ -3,6 +3,39 @@ entries:
   pdvd:
   - apiVersion: v2
     appVersion: 12.0.0
+    created: "2026-02-26T16:09:53.523486793Z"
+    dependencies:
+    - name: pdvd-arangodb
+      repository: https://ortelius.github.io/pdvd-arangodb/
+      version: 12.0.16
+    - name: pdvd-backend
+      repository: https://ortelius.github.io/pdvd-backend/
+      version: 12.0.439
+    - name: pdvd-frontend
+      repository: https://ortelius.github.io/pdvd-frontend/
+      version: 12.0.1578
+    - name: pdvd-osvdev-job
+      repository: https://ortelius.github.io/pdvd-osvdev-job/
+      version: 12.0.199
+    - name: pdvd-relscanner-job
+      repository: https://ortelius.github.io/pdvd-relscanner-job/
+      version: 12.0.10
+    description: Post-Deployment Vulnerability Detection and AI Remediation
+    digest: bac8d8bb35f796edc7f7986e26f375c6d9004103f6e77e169d73fb30a8b47aa5
+    home: https://ortelius.io
+    icon: https://ortelius.github.io/pdvd-charts/ortelius.svg
+    keywords:
+    - Vulnerability
+    - Remediation
+    - AI
+    - SBOM
+    name: pdvd
+    type: application
+    urls:
+    - https://github.com/ortelius/pdvd-charts/releases/download/pdvd-12.0.160/pdvd-12.0.160.tgz
+    version: 12.0.160
+  - apiVersion: v2
+    appVersion: 12.0.0
     created: "2026-02-24T17:31:25.115444291Z"
     dependencies:
     - name: pdvd-arangodb
@@ -4732,4 +4765,4 @@ entries:
     urls:
     - https://github.com/ortelius/pdvd-charts/releases/download/pdvd-charts-12.0.0/pdvd-charts-12.0.0.tgz
     version: 12.0.0
-generated: "2026-02-24T17:31:25.114241271Z"
+generated: "2026-02-26T16:09:53.522292977Z"
