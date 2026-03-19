@@ -9,11 +9,11 @@ keywords:
 - AI
 - SBOM
 type: application
-version: 12.0.164
+version: 12.0.165
 appVersion: 12.0.0
 dependencies:
 - name: pdvd-arangodb
-  version: 12.0.17
+  version: 12.0.18
   repository: https://ortelius.github.io/pdvd-arangodb/
 - name: pdvd-backend
   version: 12.0.439
@@ -25,5 +25,5 @@ dependencies:
   version: 12.0.199
   repository: https://ortelius.github.io/pdvd-osvdev-job/
 - name: pdvd-relscanner-job
-  version: 12.0.10
+  version: 12.0.18
   repository: https://ortelius.github.io/pdvd-relscanner-job/
