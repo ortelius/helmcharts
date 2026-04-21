@@ -15,11 +15,11 @@ const chartRepos = [
 async function getChartEntries () {
   let sha = ''
 
-  await axios.get('https://api.github.com/repos/ortelius/parent-charts/commits/main').then(response => {
+  await axios.get('https://api.github.com/repos/ortelius/helmcharts/commits/main').then(response => {
     sha = response.data.sha
   })
 
-  const url = 'https://raw.githubusercontent.com/ortelius/parent-charts/' + sha + '/charts/pdvd/Chart.yaml'
+  const url = 'https://raw.githubusercontent.com/ortelius/helmcharts/' + sha + '/charts/pdvd/Chart.yaml'
   let parts = []
   let latest = ''
   let ver = ''
@@ -72,7 +72,7 @@ function createYamlOutput () {
     name: 'pdvd',
     description: 'Post-Deployment Vulnerability Detection and AI Remediation',
     home: 'https://ortelius.io',
-    icon: 'https://ortelius.github.io/parent-charts/ortelius.svg',
+    icon: 'https://ortelius.github.io/helmcharts/ortelius.svg',
     keywords: ['Vulnerability', 'Remediation', 'AI', 'SBOM'],
     type: 'application',
     version: chartVersion,
@@ -80,13 +80,13 @@ function createYamlOutput () {
     dependencies: chartEntries
   }, { noArrayIndent: true })
 
-  fs.readFile('./charts/pdvd/README.md', 'utf8', function (err, data) {
+  fs.readFile('./charts/ortelius/README.md', 'utf8', function (err, data) {
     if (err) {
       return console.log(err)
     }
     const result = data.replace(/DEPLOYHUB_VERSION=\d+\.\d+\.\d+/g, 'DEPLOYHUB_VERSION=' + chartVersion)
 
-    fs.writeFile('./charts/pdvd/README.md', result, 'utf8', function (err) {
+    fs.writeFile('./charts/ortelius/README.md', result, 'utf8', function (err) {
       if (err) return console.log(err)
     })
   })
@@ -101,7 +101,7 @@ let chartVersion = ''
 getChartEntries().then(() => {
   const yamlOutput = createYamlOutput()
   console.log(yamlOutput)
-  fs.writeFileSync('./charts/pdvd/Chart.yaml', yamlOutput, 'utf8', (err) => {
+  fs.writeFileSync('./charts/ortelius/Chart.yaml', yamlOutput, 'utf8', (err) => {
     console.log(err)
   })
 })
