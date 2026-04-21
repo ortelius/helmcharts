@@ -9,21 +9,30 @@ keywords:
 - AI
 - SBOM
 type: application
-version: 12.0.181
+version: 12.0.182
 appVersion: 12.0.0
 dependencies:
-- name: arangodb
-  version: 12.0.17
-  repository: https://ortelius.github.io/arangodb/
+- name: pdvd-arangodb
+  version: 12.0.18
+  repository: https://ortelius.github.io/pdvd-arangodb/
 - name: ortelius
-  version: 12.0.439
+  version: 12.0.538
   repository: https://ortelius.github.io/ortelius/
 - name: frontend
-  version: 12.0.1581
+  version: 12.0.1605
   repository: https://ortelius.github.io/frontend/
+- name: pdvd-frontend
+  version: 12.0.1583
+  repository: https://ortelius.github.io/pdvd-frontend/
 - name: osvdev-job
-  version: 12.0.199
+  version: 12.0.217
   repository: https://ortelius.github.io/osvdev-job/
+- name: pdvd-osvdev-job
+  version: 12.0.199
+  repository: https://ortelius.github.io/pdvd-osvdev-job/
+- name: pdvd-relscanner-job
+  version: 12.0.18
+  repository: https://ortelius.github.io/pdvd-relscanner-job/
 - name: relscanner-job
-  version: 12.0.10
+  version: 12.0.233
   repository: https://ortelius.github.io/relscanner-job/
