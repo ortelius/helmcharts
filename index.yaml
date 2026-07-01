@@ -3,7 +3,40 @@ entries:
   ortelius:
   - apiVersion: v2
     appVersion: 12.0.0
-    created: "2026-07-01T17:20:54.58893626Z"
+    created: "2026-07-01T17:25:59.425999575Z"
+    dependencies:
+    - name: arangodb
+      repository: https://ortelius.github.io/arangodb/
+      version: 12.0.23
+    - name: ortelius
+      repository: https://ortelius.github.io/ortelius/
+      version: 12.0.504
+    - name: frontend
+      repository: https://ortelius.github.io/frontend/
+      version: 12.0.1628
+    - name: osvdev-job
+      repository: https://ortelius.github.io/osvdev-job/
+      version: 12.0.220
+    - name: relscanner-job
+      repository: https://ortelius.github.io/relscanner-job/
+      version: 12.0.609
+    description: Post-Deployment Vulnerability Detection and AI Remediation
+    digest: 4494f1f4331672dee73d5ffbe2fc3d69f236b6fd3d21056d3efbe7fa2b05c50f
+    home: https://ortelius.io
+    icon: https://ortelius.github.io/helmcharts/ortelius.svg
+    keywords:
+    - Vulnerability
+    - Remediation
+    - AI
+    - SBOM
+    name: ortelius
+    type: application
+    urls:
+    - https://github.com/ortelius/helmcharts/releases/download/v12.0.313/ortelius-12.0.313.tgz
+    version: 12.0.313
+  - apiVersion: v2
+    appVersion: 12.0.0
+    created: "2026-07-01T17:20:16.832455904Z"
     dependencies:
     - name: arangodb
       repository: https://ortelius.github.io/arangodb/
@@ -21,7 +54,7 @@ entries:
       repository: https://ortelius.github.io/relscanner-job/
       version: 12.0.609
     description: Post-Deployment Vulnerability Detection and AI Remediation
-    digest: d75a6dfef2103c79aeb0ff391450fa0888655736c07177196bb39e8570ccbe10
+    digest: 8e69f5bd437adfb03452f8c55eb92fed9599a07aa6548ee844982e8c9fc69fe2
     home: https://ortelius.io
     icon: https://ortelius.github.io/helmcharts/ortelius.svg
     keywords:
@@ -32,8 +65,8 @@ entries:
     name: ortelius
     type: application
     urls:
-    - https://github.com/ortelius/helmcharts/releases/download/v12.0.312/ortelius-12.0.312.tgz
-    version: 12.0.312
+    - https://github.com/ortelius/helmcharts/releases/download/v12.0.311/ortelius-12.0.311.tgz
+    version: 12.0.311
   - apiVersion: v2
     appVersion: 12.0.0
     created: "2026-07-01T16:45:20.412578252Z"
@@ -3400,4 +3433,4 @@ entries:
     urls:
     - https://github.com/ortelius/helmcharts/releases/download/ortelius-12.0.181/ortelius-12.0.181.tgz
     version: 12.0.181
-generated: "2026-07-01T17:20:54.587362083Z"
+generated: "2026-07-01T17:25:59.4247139Z"
