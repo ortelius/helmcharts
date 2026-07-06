@@ -9,7 +9,7 @@ keywords:
 - AI
 - SBOM
 type: application
-version: 12.0.323
+version: 12.0.324
 appVersion: 12.0.0
 dependencies:
 - name: arangodb
@@ -22,7 +22,7 @@ dependencies:
   version: 12.0.1630
   repository: https://ortelius.github.io/frontend/
 - name: osvdev-job
-  version: 12.0.221
+  version: 12.0.222
   repository: https://ortelius.github.io/osvdev-job/
 - name: relscanner-job
   version: 12.0.626
