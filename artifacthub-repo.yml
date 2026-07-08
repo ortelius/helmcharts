@@ -12,7 +12,7 @@
 # https://ortelius.github.io/helmcharts/. Once added, Artifact Hub shows an
 # "ID" on the repository's card in the control panel — paste it below and
 # uncomment to turn on "Verified publisher".
-# repositoryID: <paste-the-id-from-the-artifact-hub-control-panel-here>
+repositoryID: 920b5e53-42e8-46f0-a9e0-72c81e3a20bd
 
 # --- owners ----------------------------------------------------------------
 # Required for the "Claim Ownership" flow. Each person listed here must sign
