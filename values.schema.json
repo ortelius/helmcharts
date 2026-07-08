@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "title": "ortelius",
+  "additionalProperties": true,
+  "properties": {
+    "arangodb": {
+      "type": "object",
+      "title": "arangodb subchart configuration",
+      "description": "Values passed through to the arangodb dependency chart.",
+      "additionalProperties": true,
+      "properties": {
+        "arangodb_pass": {
+          "type": "string",
+          "title": "ArangoDB password",
+          "description": "Required. Helm install/upgrade will fail if this is missing or empty.",
+          "default": ""
+        },
+        "arangodb_user": {
+          "type": "string",
+          "title": "ArangoDB user",
+          "default": "root"
+        },
+        "arangodb_host": {
+          "type": "string",
+          "title": "ArangoDB host",
+          "description": "Set to point at an external ArangoDB instance instead of the bundled one.",
+          "default": "localhost"
+        },
+        "arangodb_port": {
+          "type": "string",
+          "title": "ArangoDB port",
+          "default": "8529"
+        },
+        "arangodb_name": {
+          "type": "string",
+          "title": "ArangoDB database name",
+          "default": "vulnmgt"
+        }
+      },
+      "required": [
+        "arangodb_pass"
+      ]
+    },
+    "frontend": {
+      "type": "object",
+      "title": "frontend subchart configuration",
+      "description": "Values passed through to the frontend dependency chart.",
+      "additionalProperties": true,
+      "properties": {
+        "ingress": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "type": {
+              "type": "string",
+              "title": "Ingress type",
+              "description": "One of: ssloff, alb, glb, k3s.",
+              "enum": [
+                "ssloff",
+                "alb",
+                "glb",
+                "k3s"
+              ],
+              "default": "glb"
+            }
+          }
+        },
+        "graphqlEndpoint": {
+          "type": "string",
+          "title": "GraphQL API endpoint",
+          "description": "The GraphQL endpoint the frontend calls.",
+          "default": "https://app.ortelius.io/api/v1/graphql"
+        }
+      }
+    }
+  },
+  "required": [
+    "arangodb",
+    "frontend"
+  ]
+}
