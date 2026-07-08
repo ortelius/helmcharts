@@ -1,0 +1,29 @@
+# Artifact Hub repository metadata.
+#
+# This file MUST live next to index.yaml on the served repo, i.e. at the
+# root of the gh-pages branch, so it is reachable at:
+#   https://ortelius.github.io/helmcharts/artifacthub-repo.yml
+#
+# Docs: https://artifacthub.io/docs/topics/repositories/#helm-charts-repositories
+#
+# --- repositoryID --------------------------------------------------------
+# Leave this commented out until the "ortelius/helmcharts" repository has
+# been (re)added in the Artifact Hub control panel pointing at
+# https://ortelius.github.io/helmcharts/. Once added, Artifact Hub shows an
+# "ID" on the repository's card in the control panel — paste it below and
+# uncomment to turn on "Verified publisher".
+# repositoryID: <paste-the-id-from-the-artifact-hub-control-panel-here>
+
+# --- owners ----------------------------------------------------------------
+# Required for the "Claim Ownership" flow. Each person listed here must sign
+# in to Artifact Hub with the matching email to be allowed to claim/manage
+# this repository. Replace with real maintainer name(s)/email(s).
+owners:
+  - name: ortelius-maintainers
+    email: steve@deployhub.com
+
+# --- ignore (optional) -------------------------------------------------------
+# Packages listed here are excluded from indexing. Not needed today since
+# this repo only publishes the single "ortelius" umbrella chart.
+# ignore:
+#   - name: some-chart-to-skip
