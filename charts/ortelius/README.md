@@ -1,24 +1,32 @@
-# DeployHub Pro
+# Ortelius
 
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/DeployHubProject/DeployHub-Pro)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ortelius/helmcharts)
 
-DeployHub is a central evidence store of all your security and DevOps intelligence. It provides comprehensive, end-to-end insights across all of your clusters and logical applications from a single dashboard. Centrally view microservice and application level SBOMs, CVEs, deployed inventory, application to microservice dependencies, impact analysis, application versions, and the use of open-source packages across the entire organization.
+Ortelius is a central evidence store of all your security and DevOps intelligence. It provides comprehensive, end-to-end insights across all of your clusters and logical applications from a single dashboard: microservice and application-level SBOMs, CVEs, deployed inventory, application-to-microservice dependencies, impact analysis, application versions, and open-source package usage across the organization.
 
-[Overview of DeployHub](https://www.deployhub.com)
-[Documentation](https://docs.deployhub.com)
+[Overview of Ortelius](https://ortelius.io)
+[Documentation](https://docs.ortelius.io)
 
 ## Additional Information
 
-This chart deploys all of the required secrets, services, and deployments on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart deploys all of the required secrets, services, and deployments on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. It is an umbrella chart made up of the following subcharts:
+
+| Subchart | Purpose |
+|---|---|
+| `arangodb` | ArangoDB database used as the evidence store |
+| `ortelius` | Core API / backend microservice |
+| `frontend` | Web UI |
+| `osvdev-job` | Scheduled job that syncs OSV vulnerability data |
+| `relscanner-job` | Scheduled job that scans releases for SBOM/CVE data |
 
 ## Prerequisites
 
 * Kubernetes 1.19+
 * Helm 3.2.0+
 
-## Installing on Kind Cluster
+## Quick Start (Kind cluster)
 
-1. Cluster Config - cluster.yaml
+1. Cluster config - `cluster.yaml`
 
     ```yaml
     kind: Cluster
@@ -38,269 +46,135 @@ This chart deploys all of the required secrets, services, and deployments on a [
       - containerPort: 443
         hostPort: 443
         protocol: TCP
-      extraMounts:
-      - hostPath: /tmp/postgres
-        containerPath: /pgdata
     ```
 
 2. Create the cluster
 
     ```console
-    mkdir /tmp/postgres
-    kind create cluster --config cluster.yaml -n deployhub
+    kind create cluster --config cluster.yaml -n ortelius
     ```
 
 3. Connect to the cluster
 
-    ```kubectl cluster-info --context kind-deployhub```
+    ```console
+    kubectl cluster-info --context kind-ortelius
+    ```
 
-4. Install DeployHub
-
-    a. Using the internal Postgres database:
+4. Add the repo and install Ortelius
 
     ```console
-    DEPLOYHUB_VERSION=12.0.1
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
+    ORTELIUS_VERSION=12.0.333
+    helm repo add ortelius https://ortelius.github.io/helmcharts/
     helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set global.postgresql.enabled=true  --set global.nginxController.enabled=true  --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
+    helm upgrade --install my-release ortelius/ortelius \
+      --set arangodb.arangodb_pass=my_db_password \
+      --version "${ORTELIUS_VERSION}" \
+      --namespace ortelius --create-namespace
     ```
 
-    > Note: This will install DeployHub persisting the Postgres data on the host system in /tmp/postgres
+    > Note: this uses the bundled ArangoDB dependency. See [Parameters](#parameters) below to point at an external ArangoDB instance instead.
 
-    b. Using the external Postgres database:
+5. Access the Ortelius UI
 
     ```console
-    DEPLOYHUB_VERSION=12.0.1
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
-    helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set dh-ms-general.dbuser=postgres --set dh-ms-general.dbhost=postgres.hosted.com --set-string dh-ms-general.dbport=5432 --set global.nginxController.enabled=true  --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
+    kubectl port-forward svc/frontend 8080:80 -n ortelius
     ```
 
-5. Access DeployHub UI
+    Then open `http://localhost:8080`.
 
-    ```http://localhost/dmadminweb/Home```
+## Installing on Google GKE or AWS EKS
 
-    > Note: default userid/pass is admin/admin
+The steps above work for a quick local evaluation. For a real GKE or EKS cluster — including VPC/networking, ingress, DNS, TLS certificates, and GitOps-based upgrades via FluxCD — use the [`platform-iac`](https://github.com/ortelius/platform-iac) repository instead of installing this chart by hand. It wraps this chart with Terraform + FluxCD so the cluster, the ingress/DNS/cert plumbing, and the Ortelius `HelmRelease` are all provisioned and kept in sync together.
 
-## Installing on Kubernetes on KillerCoda
+```console
+git clone https://github.com/ortelius/platform-iac
+cd platform-iac
+export TF_VAR_github_token="ghp_..."   # GitHub PAT with repo + admin:public_key scopes
+./terraform/deploy.sh eks apply        # or: ./terraform/deploy.sh gke apply
+```
 
-1. Login to KillerCoda Kubernetes 1.27 Playground
+`deploy.sh` will prompt you for the application secrets (ArangoDB password, SMTP credentials, GitHub OAuth app details, etc.), encrypt them with SOPS, and commit them to the repo before bootstrapping Flux. See the [platform-iac README](https://github.com/ortelius/platform-iac#files-to-update-before-deploying) for the full walkthrough, including the DNS/ACM follow-up steps for EKS.
 
-2. Create the database storage directory
+Before running `deploy.sh`, review and edit the relevant `terraform.tfvars` file:
 
-    ```console
-    mkdir /tmp/postgres
-    ```
+### `terraform/eks/terraform.tfvars`
 
-3. Install DeployHub
+| Variable | Description | Required |
+|---|---|---|
+| `aws_region` | AWS region for the cluster | Yes |
+| `cluster_name` | EKS cluster name | Yes |
+| `vpc_cidr` | VPC CIDR block | Yes |
+| `domain` | Domain used for the ACM cert and ingress | Yes |
+| `github_org` / `github_repo` | GitOps repo Flux bootstraps against (`ortelius` / `platform-iac`) | Yes |
+| `dns_provider` | `cloudflare` or `route53` | Yes |
+| `dns_zone_name` | Parent DNS zone for the cluster domain | Yes |
+| `cloudflare_api_token` | Required only when `dns_provider = cloudflare` (or set `TF_VAR_cloudflare_api_token`) | Conditional |
+| `github_token` | GitHub PAT, passed via `TF_VAR_github_token` env var — do **not** commit this | Yes (env var) |
 
-    a. Using the internal Postgres database:
+### `terraform/gke/terraform.tfvars`
 
-    ```console
-    DEPLOYHUB_VERSION=12.0.1
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
-    helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set global.postgresql.enabled=true --set dh-ms-nginx.ingress.nodePort=30000 --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
-    ```
+| Variable | Description | Required |
+|---|---|---|
+| `project_id` | GCP project ID | Yes |
+| `region` | GCP region | Yes |
+| `cluster_name` | GKE cluster name | Yes |
+| `domain` | Application domain (used by `deploy.sh`/DNS output) | Yes |
+| `github_org` / `github_repo` | GitOps repo Flux bootstraps against | Yes |
+| `node_locations` | Zones for GKE nodes, e.g. `["us-central1-a"]` | No (defaults to `["us-central1-a"]`) |
+| `github_token` | GitHub PAT, passed via `TF_VAR_github_token` env var | Yes (env var) |
 
-    > Note: This will install DeployHub persisting the Postgres data on the host system in /tmp/postgres
+### `terraform/gke-2/terraform.tfvars` (standing up a second/parallel GKE cluster)
 
-    b. Using the external Postgres database:
+Same variables as `gke`, plus:
 
-    ```console
-    DEPLOYHUB_VERSION=12.0.1
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
-    helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set dh-ms-general.dbuser=postgres --set dh-ms-general.dbhost=postgres.hosted.com --set-string dh-ms-general.dbport=5432 --set dh-ms-nginx.ingress.nodePort=30000  --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
-    ```
-
-4. Access DeployHub UI
-
-    In Killercoda UI for your session, click on the 3 bars by your "Time Left", then "Traffic/Ports".  Enter in 30000 in the custom ports and then access the custom port.  This will start a new browser tab with DeployHub home page.  Use admin/admin to login.
-
-## Installing on Google GKE
-
-1. Generate Access keys for CLI, SDK, & API access
-
-   * [Install gcloud](https://cloud.google.com/sdk/docs/install-sdk)
-   * Set your gcloud config (Refer to [gcloud documentation](https://cloud.google.com/sdk/gcloud/reference/config/set) for how-to)
-
-      ```toml
-      [compute]
-      zone = "us-central1-c"
-      [container]
-      cluster = "deployhub"
-      [core]
-      disable_usage_reporting = false
-      project = "deployhub-sandbox"
-      ```
-
-2. Setup Environment Variables
-
-   ```console
-   CLUSTER_NAME=deployhub
-   SERVICE_ACCOUNT=deployhub-k8s@deployhub-sandbox.iam.gserviceaccount.com
-   PROJECT=deployhub-sandbox
-   ```
-
-3. Create the Cluster
-
-   ```console
-   gcloud container clusters create ${CLUSTER_NAME} --logging=SYSTEM,API_SERVER --num-nodes=3 --enable-autoupgrade --machine-type=e2-standard-2 --region=us-central1 --preemptible --service-account=${SERVICE_ACCOUNT}
-   ```
-
-4. Set kubectl config access
-
-   ```console
-   gcloud container clusters get-credentials ${CLUSTER_NAME} --zone=us-central1-c
-   ```
-
-5. Install DeployHub
-
-    a. Using the external Postgres database:
-
-    ```console
-    DEPLOYHUB_VERSION=12.0.1
-    DEPLOYHUB_DNSNAME=deployhub.example.com
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
-    helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set dh-ms-general.dbuser=postgres --set dh-ms-general.dbhost=postgres.hosted.com --set-string dh-ms-general.dbport=5432 --set dh-ms-nginx.ingress.type=glb --set dh-ms-nginx.ingress.dnsname=${DEPLOYHUB_DNSNAME} --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
-    ```
-
-6. Access DeployHub UI
-
-    ```https://${DEPLOYHUB_DNSNAME}/dmadminweb/Home```
-
-    > Note: default userid/pass is admin/admin
-
-## Installing on AWS EKS
-
-1. Generate Access keys for CLI, SDK, & API access
-
-   * [Create Access Key](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials)
-      * `aws configure`
-         * Set `AWS Access Key ID`
-         * Set `AWS Secret Access Key`
-         * Set `Default region name`
-
-2. [Install eksctl](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html)
-
-3. Setup Environment Variables
-
-   ```console
-   DEPLOYHUB_VERSION=12.0.1
-   CLUSTER_NAME=deployhub
-   ```
-
-4. Create the Cluster
-
-   ```bash
-   cat <<EOF | eksctl create cluster -f -
-   ---
-   apiVersion: eksctl.io/v1alpha5
-   kind: ClusterConfig
-   metadata:
-     name: ${CLUSTER_NAME}
-     region: us-east-1
-   cloudWatch:
-     clusterLogging:
-       enableTypes:
-         - audit
-         - authenticator
-   managedNodeGroups:
-     - name: ng-1
-       amiFamily: AmazonLinux2
-       instanceSelector:
-         cpuArchitecture: x86_64
-         memory: 2GiB
-         vCPUs: 2
-       instanceTypes:
-         - t3.small
-         - t3a.small
-   iam:
-     withOIDC: true
-   addons:
-     - name: aws-ebs-csi-driver
-       version: v1.13.0-eksbuild.3
-       attachPolicyARNs:
-         - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
-   EOF
-   ```
-
-5. Install DeployHub
-
-    a. Using the external Postgres database:
-
-    ```console
-    DEPLOYHUB_VERSION=12.0.1
-    DEPLOYHUB_DNSNAME=deployhub.example.com
-    helm repo add deployhub https://deployhubproject.github.io/DeployHub-Pro/
-    helm repo update
-    helm upgrade --install my-release deployhub/deployhub --set dh-ms-general.dbpass=my_db_password --set dh-ms-general.dbuser=postgres --set dh-ms-general.dbhost=postgres.hosted.com --set-string dh-ms-general.dbport=5432 --set dh-ms-nginx.ingress.type=alb --set dh-ms-nginx.ingress.dnsname=${DEPLOYHUB_DNSNAME} --set-string 'dh-ms-nginx.ingress.alb_subnets=subnet-08c2def0d12544e2fd4\,subnet-0ff7730f35433930b32' --set-string 'dh-ms-nginx.ingress.alb_certificate_arn=arn\:aws\:acm\:us-east-1\:850343264173\:certificate\/8c2cb138-0172-477c-afb7-1d444eba2ec5' --version "${DEPLOYHUB_VERSION}" --namespace deployhub --create-namespace
-    ```
-
-6. Access DeployHub UI
-
-    ```https://${DEPLOYHUB_DNSNAME}/dmadminweb/Home```
-
-    > Note: default userid/pass is admin/admin
+| Variable | Description | Required |
+|---|---|---|
+| `gitops_path` | Directory under `clusters/` in the GitOps repo that Flux watches for this cluster (`clusters/<gitops_path>`). Defaults to `cluster_name`, but must be set explicitly when running a second cluster in parallel so the two clusters don't reconcile from the same path. | Yes, when running alongside another cluster |
+| `node_min_count` / `node_max_count` | Node pool autoscaler bounds | No (default `1` / `3`) |
 
 ## Parameters
 
 ### Common parameters
 
-| Name                   | Description                 | Value       |
-|------------------------|-----------------------------|-------------|
-| `dh-ms-general.dbuser` | Postgres Database User Name | `postgres`  |
-| `dh-ms-general.dbpass` | Postgres Database Password  | `postgres`  |
-| `dh-ms-general.dbname` | Postgres Database Name      | `postgres`  |
-| `dh-ms-general.dbhost` | Postgres Database Host Name | `localhost` |
-| `dh-ms-general.dbport` | Postgres Database Port      | `5432`      |
-| `dh-ms-nginx.ingress.type` | default nginx ingress,  AWS Load Balancer or Google Load Balancer | `ssloff, alb, glb, k3s` default `ssloff` |  
-| `dh-ms-nginx.ingress.nodePort` | set the nodePort to access the service | >= 30000 default is random port number  |
-| `dh-ms-nginx.ingress.alb_subnets`    | String of comma delimited subnets for the ALB - required when  `dh-ms-nginx.ingress.type=alb`  |   |
-| `dh-ms-nginx.ingress.alb_certificate_arn`    | ARN for the certificate from AWS Certificate Manager - required when  `dh-ms-nginx.ingress.type=alb` |  |
-| `dh-ms-nginx.ingress.dnsname`   | DNS Name that matches the certificate from AWS Certificate Manager - required when  `dh-ms-nginx.ingress.type=alb` or `dh-ms-nginx.ingress.type=glb` |  |
-| `dh-ms-nginx.ingress.scheme`    | ALB scheme - required when  `dh-ms-nginx.ingress.type=alb` |  `internal` or `internet-facing`  default `internal`|
+| Name | Description | Value |
+|------|-------------|-------|
+| `arangodb.arangodb_pass` | ArangoDB password. **Required** — Helm will fail if this is missing. | `""` |
+| `arangodb.arangodb_user` | ArangoDB user | `root` |
+| `arangodb.arangodb_host` | ArangoDB host (set this to point at an external ArangoDB instance) | `localhost` |
+| `arangodb.arangodb_port` | ArangoDB port | `8529` |
+| `arangodb.arangodb_name` | ArangoDB database name | `vulnmgt` |
+| `frontend.ingress.type` | Ingress type: `ssloff`, `alb`, `glb`, `k3s` | `glb` |
+| `frontend.graphqlEndpoint` | GraphQL API endpoint the frontend talks to | `https://app.ortelius.io/api/v1/graphql` |
 
-> NOTE: Once this chart is deployed, it is not possible to change the application's access credentials, such as usernames or passwords, using Helm. To change these application credentials after deployment, delete any persistent volumes (PVs) used by the chart and re-deploy it, or use the application's built-in administrative tools if available.
+> NOTE: once this chart is deployed, application credentials (e.g. the ArangoDB password) can't be changed via Helm alone. To rotate them, update the corresponding secret/PV and redeploy, or use the application's built-in administrative tools if available.
 
-Alternatively, a YAML file that specifies the values for the above parameters can be provided while installing the chart. For example,
+Alternatively, a YAML file specifying the values above can be provided at install time:
 
 ```console
-helm install my-release -f values.yaml deployhub/deployhub
+helm install my-release -f values.yaml ortelius/ortelius
 ```
 
-## Accessing the DeployHub UI After the Chart Install using Port Forwarding
+## Accessing the Ortelius UI via Port Forwarding
 
-> Note: default userid/pass is admin/admin
-
-* Use a port forward with kubectl to the dh-ms-nginx microservice service
-* `kubectl port-forward TYPE/NAME [options] LOCAL_PORT:REMOTE_PORT`
-* kubectl port-forward help
+* Use `kubectl port-forward` to the frontend service:
 
     ```console
-    kubectl port-forward -h
+    kubectl port-forward svc/frontend 8080:80 -n ortelius
     ```
 
-* 8080 represents the local port on your machine `http://localhost:8080`
-
-    ```console
-    kubectl port-forward svc/dh-ms-nginx 8080:80 -n deployhub
-    ```
-
-* 8443 represents the local port on your machine `http://localhost:8443`
-
-    ```console
-    kubectl port-forward svc/dh-ms-nginx 8443:443 -n deployhub
-    ```
+    Then browse to `http://localhost:8080`.
 
 ## Uninstalling the Chart
 
 To uninstall/delete the `my-release` deployment:
 
 ```console
-helm delete my-release
-    ```
+helm delete my-release -n ortelius
+```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+This removes all the Kubernetes components associated with the chart and deletes the release. It does **not** remove the `platform-iac`-managed infrastructure (VPC, cluster, DNS, certs) — use `./terraform/deploy.sh <gke|eks> destroy` in `platform-iac` for that.
+
+## Support
+
+* [Issues Tracking](https://github.com/ortelius/helmcharts/issues)
+* [Online User Guide](https://docs.ortelius.io)

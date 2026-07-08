@@ -11,6 +11,28 @@ keywords:
 type: application
 version: 12.0.333
 appVersion: 12.0.0
+# Required by Artifact Hub to render the "Sources" links and to credit the
+# repos that make up this chart / the app it deploys.
+sources:
+- https://github.com/ortelius/helmcharts
+- https://github.com/ortelius/platform-iac
+- https://github.com/ortelius/ortelius
+# TODO: replace with the real maintainer name(s)/GitHub handle(s) + email(s).
+# Artifact Hub shows these on the package page.
+maintainers:
+- name: ortelius
+  url: https://github.com/ortelius
+annotations:
+  # TODO: confirm/replace license identifier. If this is not an OSI/SPDX
+  # license, use the LicenseRef-<name> form as shown, or artifacthub.io will
+  # show "no license detected".
+  artifacthub.io/license: LicenseRef-DeployHub-Proprietary
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://docs.ortelius.io
+    - name: Production cluster deployment (Terraform + FluxCD)
+      url: https://github.com/ortelius/platform-iac
+  artifacthub.io/category: security
 dependencies:
 - name: arangodb
   version: 12.0.23
