@@ -123,15 +123,6 @@ Before running `deploy.sh`, review and edit the relevant `terraform.tfvars` file
 | `node_locations` | Zones for GKE nodes, e.g. `["us-central1-a"]` | No (defaults to `["us-central1-a"]`) |
 | `github_token` | GitHub PAT, passed via `TF_VAR_github_token` env var | Yes (env var) |
 
-### `terraform/gke-2/terraform.tfvars` (standing up a second/parallel GKE cluster)
-
-Same variables as `gke`, plus:
-
-| Variable | Description | Required |
-|---|---|---|
-| `gitops_path` | Directory under `clusters/` in the GitOps repo that Flux watches for this cluster (`clusters/<gitops_path>`). Defaults to `cluster_name`, but must be set explicitly when running a second cluster in parallel so the two clusters don't reconcile from the same path. | Yes, when running alongside another cluster |
-| `node_min_count` / `node_max_count` | Node pool autoscaler bounds | No (default `1` / `3`) |
-
 ## Parameters
 
 ### Common parameters

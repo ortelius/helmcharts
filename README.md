@@ -1,39 +1,33 @@
-# Microservice Configuration Management - Track, Version, Find, Share and Deploy Microservices
+# Ortelius Helm Charts
 
-* Publish and Share your Kubernetes Microservices and other Artifacts using a [Domain Driven Design](https://www.deployhub.com/domain-driven-design-microservices/).
-* [Version your Microservices](https://www.deployhub.com/versioning-container-content-the-single-source-of-truth/) and create a single source of truth.  Associate microservice versions to applications.  
-* Add DeployHub to your existing CI/CD Process to automate continuous deployments or begin driving a [Kubernetes Pipeline](https://www.deployhub.com/kubernetes-pipeline-challenges/).
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ortelius/helmcharts)
 
-## Detailed Install Instructions
+This repository hosts the Helm charts for [Ortelius](https://ortelius.io), an open-source continuous security intelligence platform for decoupled architectures. Ortelius ingests SBOMs at build time, matches deployed components against the OSV vulnerability database, and tracks every CVE from introduction through remediation across all of your clusters and logical applications — from a single dashboard.
 
-* [Saas Reverse Proxy Install](https://www.deployhub.com/reverse-proxy-setup/)
-* [On-Prem Install](https://www.deployhub.com/deployhub-pro-on-prem-installation/)
+* [Overview of Ortelius](https://ortelius.io)
+* [Documentation](https://docs.ortelius.io)
+* [Chart on ArtifactHub](https://artifacthub.io/packages/helm/ortelius/ortelius)
+
+## Charts
+
+| Chart | Purpose |
+|---|---|
+| [`ortelius`](charts/ortelius) | Umbrella chart for the full application stack (ArangoDB, backend API, frontend, and scheduled scanner jobs) |
+
+See the [`ortelius` chart README](charts/ortelius/README.md) for installation instructions, including a Kind quick start and a production install via [Terraform + FluxCD](https://github.com/ortelius/platform-iac).
+
+## Install with Helm
+
+```console
+helm repo add ortelius https://ortelius.github.io/helmcharts
+helm install my-release ortelius/ortelius
+```
+
+## Install with Terraform
+
+[github.com/ortelius/platform-iac](https://github.com/ortelius/platform-iac) provisions the underlying infrastructure (EKS or GKE), bootstraps FluxCD, and hands off the Helm release above to it for ongoing GitOps-managed upgrades. See the [Self-Hosted guide](https://docs.ortelius.io/guides/start-here/choose-your-path/self-hosted/) for the full walkthrough.
 
 ## Support
 
-* [Issues Tracking](https://github.com/DeployHubProject/DeployHub-Pro/issues)
-* [Online User Guide](https://docs.deployhub.com)
-
-## DeployHub and DeployHub Pro Features
-
-* Easy Installation - No End Point Agents
-* Easy to configure - graphical application packaging
-* Integrates with Infrastructure Configuration Management  
-* Push or Pull deployments with version 'jumping'  
-* Database Management Support  
-* Pre-Built Reusable Deployment Actions and Workflows  
-* Jenkins and Continuous Delivery Plugins  
-* Multi-Platform (Linux, UNIX, Windows, z/OS, iSeries, Cisco Routers)  
-* Rollback and Roll Forward Recovery  
-* Environment Modeling and Management  
-* Continuous Feedback Loop from Build to End Point
-
-## DeployHub Pro Only Features
-
-* Release Train Management (manage multiple applications)  
-* Calendar with integrated pre-approvals and blocking  
-* Role Based Security  
-* Change Request Tracking  
-* Continuous Feedback Loop from issue tracking to endpoint
-* Change Request Burn Down Charts  
-* Component Sharing and Workflow Templates
+* [Issues Tracking](https://github.com/ortelius/helmcharts/issues)
+* [Online User Guide](https://docs.ortelius.io)
