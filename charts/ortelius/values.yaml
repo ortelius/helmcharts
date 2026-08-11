@@ -46,8 +46,6 @@ arangodb:
     kubernetes.io/os: linux
     workload: system
 
-  priorityClassName: database-critical
-
   probes:
     enabled: true
     startup:
@@ -127,8 +125,6 @@ osvdev-job:
       value: batch
       effect: NoSchedule
 
-  priorityClassName: batch-low
-
 # --------------------------------------------------------------------------
 # 5. relscanner-job
 # --------------------------------------------------------------------------
@@ -155,5 +151,3 @@ relscanner-job:
       operator: Equal
       value: batch
       effect: NoSchedule
-
-  priorityClassName: batch-low
