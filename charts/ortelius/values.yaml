@@ -62,12 +62,13 @@ frontend:
     type: "glb"
   graphqlEndpoint: "https://app.ortelius.io/api/v1/graphql"
 
+  # Measured: 2m CPU / 113Mi. Matched cpu+memory req/lim -> Guaranteed QoS.
   resources:
     requests:
       cpu: 50m
       memory: 256Mi
     limits:
-      cpu: 200m
+      cpu: 50m
       memory: 256Mi
 
   nodeSelector:
@@ -78,12 +79,15 @@ frontend:
 # 3. ortelius  (measured: 69m CPU / 176Mi)
 # --------------------------------------------------------------------------
 ortelius:
+  # Measured: 69m CPU / 176Mi. cpu request == limit and memory request ==
+  # limit together give Guaranteed QoS; with only memory matched the pod
+  # stays Burstable and remains evictable under node memory pressure.
   resources:
     requests:
       cpu: 150m
       memory: 384Mi
     limits:
-      cpu: 500m
+      cpu: 150m
       memory: 384Mi
 
   nodeSelector:
