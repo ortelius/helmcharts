@@ -1,23 +1,155 @@
 # --------------------------------------------------------------------------
-# 1. arangodb Subchart Configuration
-#    These values are intended for the ArangoDB dependency chart.
+# Ortelius umbrella values
+#
+# NOTE: the scheduling/resource keys below require the subchart template
+# changes in ./subchart-patches/. Until those ship, Helm will silently
+# ignore every key it does not recognise — nothing will error, and nothing
+# will take effect. Verify with `helm template` before trusting a rollout.
+# --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# 1. arangodb
 # --------------------------------------------------------------------------
 arangodb:
-  # The password is marked as REQUIRED in the template logic.
-  # Helm will fail if this value is missing or commented out.
-  arangodb_pass: "" 
-  
-  # Other ArangoDB variables (these still have defaults in your template)
+  arangodb_pass: ""
   arangodb_user: "root"
   arangodb_host: "localhost"
   arangodb_port: "8529"
   arangodb_name: "vulnmgt"
 
+  # Memory request == limit -> Guaranteed QoS, no kubelet eviction.
+  # CPU limit deliberately omitted: throttling stalls RocksDB compaction.
+  #
+  # Measured steady state after dropping the four redundant edge indexes:
+  # 5m CPU / ~1305Mi, RocksDB idle (compaction_pending=0). The earlier
+  # 1421m was write amplification from ~4.2M unused index entries.
+  # 300m is ~60x measured, leaving room for query bursts and `cve` growth.
+  resources:
+    requests:
+      cpu: 300m
+      memory: 4Gi
+    limits:
+      memory: 4Gi
+
+  # ArangoDB sizes caches from HOST memory unless overridden, so it will
+  # allocate past the cgroup limit and get OOM-killed (exit 137).
+  # INVARIANT: overrideTotalMemory (bytes) == resources.limits.memory.
+  # Memory stays at 4Gi -- the ~2.8GB dataset still benefits from cache,
+  # and memory was never the bottleneck.
+  rocksdb:
+    overrideTotalMemory: "4294967296"   # 4Gi
+    blockCacheSize: "2147483648"        # 2Gi
+    totalWriteBufferSize: "536870912"   # 512Mi
+    enforceBlockCacheSizeLimit: true
+
+  nodeSelector:
+    kubernetes.io/os: linux
+    workload: system
+
+  priorityClassName: database-critical
+
+  probes:
+    enabled: true
+    startup:
+      periodSeconds: 10
+      failureThreshold: 60    # 10 min for WAL replay before liveness starts
+
 # --------------------------------------------------------------------------
-# 2. frontend Subchart Configuration
-#    These values are intended for the Frontend dependency chart.
+# 2. frontend  (measured: 2m CPU / 113Mi)
 # --------------------------------------------------------------------------
 frontend:
   ingress:
     type: "glb"
   graphqlEndpoint: "https://app.ortelius.io/api/v1/graphql"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  nodeSelector:
+    kubernetes.io/os: linux
+    workload: system
+
+# --------------------------------------------------------------------------
+# 3. ortelius  (measured: 69m CPU / 176Mi)
+# --------------------------------------------------------------------------
+ortelius:
+  resources:
+    requests:
+      cpu: 150m
+      memory: 384Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+
+  nodeSelector:
+    kubernetes.io/os: linux
+    workload: system
+
+# --------------------------------------------------------------------------
+# 4. osvdev-job
+#
+# concurrencyPolicy: Forbid is already hardcoded in the subchart. Combined
+# with the ~17 min run on 2026-08-11 (10.5 min of it blocked on the Ubuntu
+# ecosystem fetch), that is what SKIPPED ticks 29773035 and 29773050.
+# activeDeadlineSeconds caps a run below the 15 min interval so a stall
+# fails fast and the next tick still runs.
+# --------------------------------------------------------------------------
+osvdev-job:
+  schedule: "*/15 * * * *"
+  activeDeadlineSeconds: 780     # 13 min
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 300
+
+  resources:
+    requests:
+      cpu: 300m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  nodeSelector:
+    kubernetes.io/os: linux
+    workload: batch
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: batch
+      effect: NoSchedule
+
+  priorityClassName: batch-low
+
+# --------------------------------------------------------------------------
+# 5. relscanner-job
+# --------------------------------------------------------------------------
+relscanner-job:
+  schedule: "*/15 * * * *"
+  activeDeadlineSeconds: 780
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 300
+
+  resources:
+    requests:
+      cpu: 300m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  nodeSelector:
+    kubernetes.io/os: linux
+    workload: batch
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: batch
+      effect: NoSchedule
+
+  priorityClassName: batch-low
