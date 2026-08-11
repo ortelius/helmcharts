@@ -29,6 +29,7 @@ arangodb:
       cpu: 300m
       memory: 4Gi
     limits:
+      cpu: 300m
       memory: 4Gi
 
   # ArangoDB sizes caches from HOST memory unless overridden, so it will
