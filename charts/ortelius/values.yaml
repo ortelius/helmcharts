@@ -47,7 +47,7 @@ arangodb:
     workload: system
 
   probes:
-    enabled: true
+    enabled: false
     startup:
       periodSeconds: 10
       failureThreshold: 60    # 10 min for WAL replay before liveness starts
