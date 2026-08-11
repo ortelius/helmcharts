@@ -73,6 +73,9 @@ frontend:
     kubernetes.io/os: linux
     workload: system
 
+  # frontend is the public entry point behind the GLB ingress; keeping it on
+  # system-pool means a spot preemption cannot take down the UI.
+
 # --------------------------------------------------------------------------
 # 3. ortelius  (measured: 69m CPU / 176Mi)
 # --------------------------------------------------------------------------
