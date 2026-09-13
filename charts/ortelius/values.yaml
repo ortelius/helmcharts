@@ -117,7 +117,7 @@ osvdev-job:
       memory: 1Gi
     limits:
       cpu: 1000m
-      memory: 1Gi
+      memory: 2Gi
 
   nodeSelector:
     kubernetes.io/os: linux
@@ -141,10 +141,14 @@ relscanner-job:
   resources:
     requests:
       cpu: 300m
-      memory: 1Gi
+      memory: 2Gi
     limits:
       cpu: 1000m
-      memory: 1Gi
+      memory: 3Gi
+
+  extraEnv:
+    - name: GOMEMLIMIT
+      value: "2700MiB"
 
   nodeSelector:
     kubernetes.io/os: linux
