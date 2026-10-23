@@ -3,7 +3,7 @@ entries:
   ortelius:
   - apiVersion: v2
     appVersion: 12.0.0
-    created: "2026-10-23T18:44:11.107313252Z"
+    created: "2026-10-23T18:48:27.957193067Z"
     dependencies:
     - name: arangodb
       repository: https://ortelius.github.io/arangodb/
@@ -13,7 +13,7 @@ entries:
       version: 12.0.540
     - name: frontend
       repository: https://ortelius.github.io/frontend/
-      version: 12.0.1654
+      version: 12.0.1655
     - name: osvdev-job
       repository: https://ortelius.github.io/osvdev-job/
       version: 12.0.235
@@ -21,7 +21,7 @@ entries:
       repository: https://ortelius.github.io/relscanner-job/
       version: 12.0.1190
     description: Post-Deployment Vulnerability Detection and AI Remediation
-    digest: 85f098d59eca1940ff469fef1d6a4356798cd070fddac59483a06270bb1915a1
+    digest: 1fec99a1cb35bcc4e024de9eca0e8a9f47239fc07cf47ea49eafae3515da5c3c
     home: https://ortelius.io
     icon: https://ortelius.github.io/helmcharts/ortelius.svg
     keywords:
@@ -32,8 +32,41 @@ entries:
     name: ortelius
     type: application
     urls:
-    - https://github.com/ortelius/helmcharts/releases/download/v12.0.438/ortelius-12.0.438.tgz
-    version: 12.0.438
+    - https://github.com/ortelius/helmcharts/releases/download/v12.0.440/ortelius-12.0.440.tgz
+    version: 12.0.440
+  - apiVersion: v2
+    appVersion: 12.0.439
+    created: "2026-10-23T18:42:33.179652909Z"
+    dependencies:
+    - name: arangodb
+      repository: https://ortelius.github.io/arangodb/
+      version: 12.0.26
+    - name: ortelius
+      repository: https://ortelius.github.io/ortelius/
+      version: 12.0.539
+    - name: frontend
+      repository: https://ortelius.github.io/frontend/
+      version: 12.0.1654
+    - name: osvdev-job
+      repository: https://ortelius.github.io/osvdev-job/
+      version: 12.0.234
+    - name: relscanner-job
+      repository: https://ortelius.github.io/relscanner-job/
+      version: 12.0.1190
+    description: Post-Deployment Vulnerability Detection and AI Remediation
+    digest: 370012fba08b21f43ebc178a5894a1bdbcff22e994ea385e293c32b3921e6f13
+    home: https://ortelius.io
+    icon: https://ortelius.github.io/helmcharts/ortelius.svg
+    keywords:
+    - Vulnerability
+    - Remediation
+    - AI
+    - SBOM
+    name: ortelius
+    type: application
+    urls:
+    - https://github.com/ortelius/helmcharts/releases/download/v12.0.439/ortelius-12.0.439.tgz
+    version: 12.0.439
   - apiVersion: v2
     appVersion: 12.0.0
     created: "2026-10-23T17:53:49.737962212Z"
@@ -2953,4 +2986,4 @@ entries:
     urls:
     - https://github.com/ortelius/helmcharts/releases/download/v12.0.331/ortelius-12.0.331.tgz
     version: 12.0.331
-generated: "2026-10-23T18:44:11.105630136Z"
+generated: "2026-10-23T18:48:27.954992448Z"
