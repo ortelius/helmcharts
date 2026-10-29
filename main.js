@@ -1,4 +1,3 @@
-const axios = require('axios')
 const yaml = require('js-yaml')
 const fs = require('fs')
 require('process')
@@ -12,20 +11,24 @@ const chartRepos = [
 ]
 
 // Helper functions
+async function get (url) {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' for ' + url)
+  return res
+}
+
 async function getChartEntries () {
   let sha = ''
 
-  await axios.get('https://api.github.com/repos/ortelius/helmcharts/commits/main').then(response => {
-    sha = response.data.sha
-  })
+  sha = (await (await get('https://api.github.com/repos/ortelius/helmcharts/commits/main')).json()).sha
 
   const url = 'https://raw.githubusercontent.com/ortelius/helmcharts/' + sha + '/charts/ortelius/Chart.yaml'
   let parts = []
   let latest = ''
   let ver = ''
 
-  await axios.get(url).then(response => {
-      const parsedYaml = yaml.load(response.data)
+  await get(url).then(res => res.text()).then(data => {
+      const parsedYaml = yaml.load(data)
       chartVersion = parsedYaml.version
       parts = chartVersion.split('.')
       parts[2] = process.env.RUN_NUMBER
@@ -35,14 +38,12 @@ async function getChartEntries () {
   const latestChart = []
 
   for (let i = 0; i < chartRepos.length; i++) {
-    await axios.get('https://api.github.com/repos/' + chartRepos[i] + '/commits/gh-pages').then(response => {
-      sha = response.data.sha
-    })
+    sha = (await (await get('https://api.github.com/repos/' + chartRepos[i] + '/commits/gh-pages')).json()).sha
 
     const repoUrl = 'https://raw.githubusercontent.com/' + chartRepos[i] + '/' + sha + '/index.yaml'
 
-    await axios.get(repoUrl).then(response => {
-      const parsedYaml = yaml.load(response.data)
+    await get(repoUrl).then(res => res.text()).then(data => {
+      const parsedYaml = yaml.load(data)
       const entries = parsedYaml.entries
 
       Object.keys(entries).forEach(key => {
