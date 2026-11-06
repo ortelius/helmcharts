@@ -53,6 +53,13 @@ arangodb:
       periodSeconds: 10
       failureThreshold: 60    # 10 min for WAL replay before liveness starts
 
+  ingress:
+    enabled: true
+    host: arangodb.deployhub.com
+    staticIpName: arangodb-static-ip
+    backendConfig:
+      securityPolicy: arangodb-dev-allowlist
+
 # --------------------------------------------------------------------------
 # 2. frontend  (measured: 2m CPU / 113Mi)
 # --------------------------------------------------------------------------
