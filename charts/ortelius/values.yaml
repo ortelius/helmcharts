@@ -57,6 +57,7 @@ arangodb:
     enabled: true
     host: arangodb.deployhub.com
     staticIpName: arangodb-static-ip
+    managedCertName: arangodb-managed-cert-2
     backendConfig:
       securityPolicy: arangodb-dev-allowlist
 
